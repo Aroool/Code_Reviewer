@@ -8,14 +8,24 @@ client = openai.OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 # Set up the Streamlit app
 st.set_page_config(page_title="Python Code Reviewer", layout="centered")
 
-st.title("🐍 Python Code Reviewer & Refactorer!!!!")
+st.title("🐍 Python Code Reviewer & Refactorer!!")
 st.caption("Paste your Python code below and get review suggestions or a refactored version using GPT-4.")
 
-# Text area for code input
-code_input = st.text_area("📥 Paste your Python code here:", height=300)
+
+# 📁 Upload Python file
+uploaded_file = st.file_uploader("📂 Upload a Python (.py) file", type=["py"])
+
+# 🔁 Read uploaded file or fallback to blank input
+code_input = ""
+if uploaded_file:
+    code_input = uploaded_file.read().decode("utf-8")
+
+# 🧾 Unified Text Area (only one shown always)
+code_input = st.text_area("📥 Paste your Python code here:", value=code_input, height=300, key="code_box")
+
 
 # Layout for two buttons
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 
 # 🔍 Review Code Button
 if col3.button("🔍 Review Code"):
@@ -106,15 +116,34 @@ You're an expert Python tutor. Explain this code to a beginner in super simple t
             except Exception as e:
                 st.error(f"❌ Error: {e}")
 
-# 📁 File uploader
-uploaded_file = st.file_uploader("📂 Upload a Python (.py) file", type=["py"])
 
-# 📥 Unified code input area (always visible)
-# Pre-fill with file content if uploaded, otherwise empty
-code_input = st.text_area(
-    "📥 Paste your Python code here:",
-    value=uploaded_file.read().decode("utf-8") if uploaded_file else "",
-    height=300,
-    key="code_box"
-)
+# 🗺️ Flowchart Generator Button
+if col4.button("🗺️ Flowchart"):
+    if code_input.strip() == "":
+        st.warning("Please enter some code first.")
+    else:
+        with st.spinner("Generating flowchart..."):
+            flowchart_prompt = f"""
+You're a Python expert. Convert the following code into a Mermaid.js flowchart.
 
+Rules:
+- Use 'flowchart TD' format.
+- Capture major steps like input, conditionals, loops, and returns.
+- Do NOT include actual code — just high-level logic.
+
+Code:
+```python
+{code_input}
+```
+"""
+            try:
+                response = client.chat.completions.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": flowchart_prompt}],
+                temperature=0.3,
+                max_tokens=500,
+                )
+                st.success("🧭 Flowchart Generated:")
+                st.markdown(f"mermaid\n{response.choices[0].message.content}\n", unsafe_allow_html=True)
+            except Exception as e:
+                st.error(f"❌ Error: {e}")
