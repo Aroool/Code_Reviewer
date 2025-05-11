@@ -109,8 +109,12 @@ You're an expert Python tutor. Explain this code to a beginner in super simple t
 # 📁 File uploader
 uploaded_file = st.file_uploader("📂 Upload a Python (.py) file", type=["py"])
 
-# If file uploaded, read content
-if uploaded_file is not None:
-    code_input = uploaded_file.read().decode("utf-8")
-else:
-    code_input = st.text_area("📥 Paste your Python code here:", height=300)
+# 📥 Unified code input area (always visible)
+# Pre-fill with file content if uploaded, otherwise empty
+code_input = st.text_area(
+    "📥 Paste your Python code here:",
+    value=uploaded_file.read().decode("utf-8") if uploaded_file else "",
+    height=300,
+    key="code_box"
+)
+
