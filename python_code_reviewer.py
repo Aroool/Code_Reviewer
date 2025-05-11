@@ -1,9 +1,9 @@
 import streamlit as st
 import openai
-
+from dotenv import load_dotenv
+load_dotenv()
 import os
 client = openai.OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-
 
 # Set up the Streamlit app
 st.set_page_config(page_title="Python Code Reviewer", layout="centered")
@@ -105,3 +105,12 @@ You're an expert Python tutor. Explain this code to a beginner in super simple t
                 st.markdown(response.choices[0].message.content)
             except Exception as e:
                 st.error(f"❌ Error: {e}")
+
+# 📁 File uploader
+uploaded_file = st.file_uploader("📂 Upload a Python (.py) file", type=["py"])
+
+# If file uploaded, read content
+if uploaded_file is not None:
+    code_input = uploaded_file.read().decode("utf-8")
+else:
+    code_input = st.text_area("📥 Paste your Python code here:", height=300)
