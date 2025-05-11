@@ -1,13 +1,14 @@
 import streamlit as st
 import openai
 
-client = openai.OpenAI(api_key="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")
+import os
+client = openai.OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 
 # Set up the Streamlit app
-st.set_page_config(page_title="Python Code Reviewer!", layout="centered")
+st.set_page_config(page_title="Python Code Reviewer", layout="centered")
 
-st.title("🐍 Python Code Reviewer & Refactorer")
+st.title("🐍 Python Code Reviewer & Refactorer!!!!")
 st.caption("Paste your Python code below and get review suggestions or a refactored version using GPT-4.")
 
 # Text area for code input
