@@ -1,19 +1,73 @@
 import streamlit as st
 import openai
+import time
 from dotenv import load_dotenv
 load_dotenv()
 import os
 client = openai.OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
-# Set up the Streamlit app
-st.set_page_config(page_title="Python Code Reviewer", layout="centered")
-
-st.title("🐍 Python Code Reviewer & Refactorer!!")
-st.caption("Paste your Python code below and get review suggestions or a refactored version using GPT-4.")
 
 
-# 📁 Upload Python file
-uploaded_file = st.file_uploader("📂 Upload a Python (.py) file", type=["py"])
+# 🚫 Hide sidebar and the toggle button completely
+st.set_page_config(page_title="DevSensei", layout="centered", initial_sidebar_state="collapsed")
+st.markdown("""
+    <style>
+        [data-testid="stSidebar"] { display: none !important; }
+        [data-testid="collapsedControl"] { display: none !important; }
+    </style>
+""", unsafe_allow_html=True)
+
+
+# Typing animation for DevSensei title
+title_placeholder = st.empty()
+full_title = "🥋 DevSensei"
+
+typed_title = ""
+for char in full_title:
+    typed_title += char
+    title_placeholder.markdown(
+        f"<h1 style='text-align: center; font-size: 48px;'>{typed_title}</h1>",
+        unsafe_allow_html=True
+    )
+    time.sleep(0.1)  # Typing speed (adjust as needed)
+
+# Optional subtitle with fade effect
+st.markdown(
+    "<p style='text-align: center; font-size: 20px; color: #666;'>Your Multi-Language Code Mentor</p>",
+    unsafe_allow_html=True
+)
+
+
+# Other Home page content...
+
+# Navigation Button
+if st.button("🧠 Go to GitHub Code Analyzer"):
+    st.switch_page("pages/Github_Code_Analyzer.py")
+
+
+# st.title(" DevSensei")
+# st.caption("Paste your Python code below and get review suggestions or a refactored version using GPT-4.")
+
+
+
+# Language selector
+language = st.selectbox("Select Programming Language", ["Python", "JavaScript", "Java", "C++", "Go", "Rust"])
+
+# Map each language to its appropriate file extensions
+file_types = {
+    "Python": ["py"],
+    "JavaScript": ["js"],
+    "Java": ["java"],
+    "C++": ["cpp", "h"],
+    "Go": ["go"],
+    "Rust": ["rs"]
+}
+
+# Get the appropriate extension(s) for the selected language
+allowed_exts = file_types.get(language, ["txt"])  # default to txt if somehow missing
+
+# File uploader that adapts to the selected language
+uploaded_file = st.file_uploader(f"📂 Upload your {language} file", type=allowed_exts)
 
 # 🔁 Read uploaded file or fallback to blank input
 code_input = ""
@@ -21,7 +75,7 @@ if uploaded_file:
     code_input = uploaded_file.read().decode("utf-8")
 
 # 🧾 Unified Text Area (only one shown always)
-code_input = st.text_area("📥 Paste your Python code here:", value=code_input, height=300, key="code_box")
+code_input = st.text_area(f"📥 Paste your {language} code here:", value=code_input, height=300, key="code_box")
 
 
 # Layout for two buttons
@@ -34,7 +88,7 @@ if col3.button("🔍 Review Code"):
     else:
         with st.spinner("Reviewing your code..."):
             review_prompt = f""""
-You are a senior Python developer. Review the following code for:
+You are a senior {language} developer. Review the following code for:
 - Readability
 - Performance
 - Code smells or issues
@@ -43,7 +97,7 @@ You are a senior Python developer. Review the following code for:
 Provide bullet-point feedback.
 
 Code:
-```python
+```{language.lower()}
 {code_input}
 ```
 """
@@ -66,7 +120,7 @@ if col2.button("🛠️ Refactor Code"):
     else:
         with st.spinner("Refactoring your code..."):
             refactor_prompt = f""""
-You are a senior Python developer. Refactor the code below to improve:
+You are a senior {language} developer. Refactor the code below to improve:
 - Readability and formatting
 - Code structure and modularity
 - Follow PEP8 standards
@@ -74,7 +128,7 @@ You are a senior Python developer. Refactor the code below to improve:
 Add docstrings and inline comments where appropriate.
 
 Code:
-```python
+```{language.lower()}
 {code_input}
 ```
 """
@@ -99,8 +153,8 @@ if col1.button("📖 Explain Code"):
     else:
         with st.spinner("Explaining your code..."):
             explain_prompt = f"""
-You're an expert Python tutor. Explain this code to a beginner in super simple terms. Break it down line by line. Be casual and easy to understand.
-```python
+You're an expert {language} tutor. Explain this code to a beginner in super simple terms. Break it down line by line. Be casual and easy to understand.
+```{language.lower()}
 {code_input}
 ```
 """
@@ -124,7 +178,7 @@ if col4.button("🗺️ Flowchart"):
     else:
         with st.spinner("Generating flowchart..."):
             flowchart_prompt = f"""
-You're a Python expert. Convert the following code into a Mermaid.js flowchart.
+You're a {language} expert. Convert the following code into a Mermaid.js flowchart.
 
 Rules:
 - Use 'flowchart TD' format.
@@ -132,7 +186,7 @@ Rules:
 - Do NOT include actual code — just high-level logic.
 
 Code:
-```python
+```{language.lower()}
 {code_input}
 ```
 """
